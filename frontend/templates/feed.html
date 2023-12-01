@@ -84,10 +84,28 @@
                     {{ range .FeedObjects}}
                         <ul>
                             <li> 
-                                <video id="shortsVideo" width="640" height="360" autoplay muted loop playsinline>
-                                    <source src="{{ .VideoURL }}" type="video/mp4" >
-                                    Your browser does not support the video tag.
-                                </video>
+                                <div class="container" style="background-color:rgb(244, 234, 234); padding-top: 40px;">
+                                    <div class="row">
+                                            <div class="border border-success bg-white rounded" style="padding-left: 40px; padding-right: 40px; padding-top: 40px; padding-bottom: 40px;">
+                                                <a class="profile" href="/show_profile_page/user.profile.id" style="text-decoration: none;">
+                                                    <div class="profile-photo" style="cursor:pointer;">
+                                                        <!-- Replace with dynamic user profile pic URL -->
+                                                        <img src="https://picsum.photos/200/300" alt="Profile Picture">
+                                                    </div>
+                                                    <div class="handle">
+                                                        <!-- Replace with dynamic user profile details -->
+                                                        <h4>{{ .PostedBy }}</h4>
+                                                    </div>
+                                                </a>
+                                                <h4>{{ .Title }}</h4>
+                                                <video id="shortsVideo" width="640" height="360" autoplay muted loop playsinline>
+                                                    <source src="{{ .VideoURL }}" type="video/mp4" >
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                                <h5 class="text-muted">{{ .Description }}</h5>
+                                            </div>
+                                    </div>
+                                </div>
                             </li>
                         </ul>
                     {{ end }}
