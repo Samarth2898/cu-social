@@ -1,4 +1,4 @@
-module example.com/mod
+module cu-social
 
 go 1.21.4
 

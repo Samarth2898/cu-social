@@ -22,8 +22,7 @@ type FeedObject struct {
 
 func main() {
 	r := gin.Default()
-	r.LoadHTMLFiles("templates/gin-test.html", "templates/feed.html")
-
+	r..LoadHTMLGlob("templates/*")
 	r.Static("/styles", "./styles")
 	r.Static("/js", "./js")
 	r.Static("/images", "./images")
