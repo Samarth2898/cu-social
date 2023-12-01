@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Other head content -->
+    <!-- Link to external JavaScript file -->
+    <script src="../js/feed-script.js"></script>
+    <link rel="stylesheet" type="text/css" href="../styles/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="log">
+                <img src="../images/Colorado_Buffs_logo.png" style="height:75px;cursor:pointer;">
+            </div>
+
+            <!-- Search bar -->
+            <form action="/search" method="POST">
+                <input type="hidden" name="csrfmiddlewaretoken" value="">
+                <div class="search-bar">
+                    <input type="search" placeholder="Search for other users" name="username">
+                    <button type="submit"><i class="uil uil-search"></i></button>
+                </div>
+            </form>
+
+            <div class="create">
+                <a href="/logout">logout</a>
+                <a href="/signup">Signup</a>
+                <a href="/login">Login</a>
+                <button class="btn btn-primary">
+                    <a href="/add_post" style="color: #fff;text-decoration: none;">Create Post</a>
+                </button>
+                <div class="profile-photo" style="cursor:pointer;">
+                    <a class="profile" href="" style="text-decoration: none;">
+                        <!-- Replace with get profile pic image URL -->
+                        <img src="https://picsum.photos/200/300" alt="Profile Picture">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main style="background-color:rgb(244, 234, 234); padding-top: 40px;">
+        <div class="container d-flex justify-content-start">
+            <div class="left">
+                <a class="profile" href="/show_profile_page/user.profile.id" style="text-decoration: none;">
+                    <div class="profile-photo" style="cursor:pointer;">
+                        <!-- Replace with dynamic user profile pic URL -->
+                        <img src="https://picsum.photos/200/300" alt="Profile Picture">
+                    </div>
+                    <div class="handle">
+                        <!-- Replace with dynamic user profile details -->
+                        <h4>User Profile First Name</h4>
+                        <p class="text-muted">User Profile Username</p>
+                    </div>
+                </a>
+                <div class="sidebar">
+                    <a class="menu-item active" href="/home" style="text-decoration: none;">
+                        <span><i class="uil uil-home"></i></span><h3>Home</h3>
+                    </a>
+                    <a class="menu-item" href="/add_post" style="text-decoration: none;">
+                        <span><i class="uil uil-compass"></i></span><h3>Add Post</h3>
+                    </a>
+                    <a class="menu-item" href="/show_profile_page/user.profile.id" style="text-decoration: none;">
+                        <span><i class="uil uil-bookmark"></i></span><h3>Profile</h3>
+                    </a>
+                </div>
+                <button class="btn btn-primary">
+                    <a href="/add_post" style="color: #fff;text-decoration: none;">Create Post</a>
+                </button>
+            </div>
+
+        <div class="middle">
+                <!-- {% if count_posts == 0 %} -->
+                <!-- Handle case when there are no posts -->
+                {{ if eq (len .FeedObjects) 0 }}
+                    <div class="empty-state">
+                        <div class="empty-state__content">
+                            <div class="empty-state__message" style="color: #9a35dd;font-weight: bold;font-size: 30px; text-align: center;">
+                                No posts have been added yet.
+                            </div>
+                        </div>
+                    </div>
+                {{ else }}
+                    {{ range .FeedObjects}}
+                        <ul>
+                            <li> 
+                                <video id="shortsVideo" width="640" height="360" autoplay muted loop playsinline>
+                                    <source src="{{ .VideoURL }}" type="video/mp4" >
+                                    Your browser does not support the video tag.
+                                </video>
+                            </li>
+                        </ul>
+                    {{ end }}
+                {{ end }}
+            </div>
+        </div>
+    </main>
+</body>
+</html>
