@@ -1,8 +1,31 @@
-CREATE TABLE "users" (
-  "username" varchar PRIMARY KEY,
-  "hashed_password" varchar NOT NULL,
-  "full_name" varchar NOT NULL,
-  "email" varchar UNIQUE NOT NULL,
-  "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+CREATE TABLE "follows" (
+  "FollowingUserId" integer,
+  "FollowedUserId" integer
 );
+
+CREATE TABLE "users" (
+  "UserID" integer PRIMARY KEY,
+  "Username" varchar,
+  "Password" varchar,
+  "ProfilePicture" varchar,
+  "Biography" text,
+  "Email" varchar,
+  "CreatedAt" timestamp
+);
+
+CREATE TABLE "posts" (
+  "PostId" integer PRIMARY KEY,
+  "Title" varchar,
+  "Body" text,
+  "UserID" integer,
+  "Status" varchar,
+  "CreatedAt" timestamp
+);
+
+COMMENT ON COLUMN "posts"."Body" IS 'Content of the post';
+
+ALTER TABLE "posts" ADD FOREIGN KEY ("UserID") REFERENCES "users" ("UserID");
+
+ALTER TABLE "follows" ADD FOREIGN KEY ("FollowingUserId") REFERENCES "users" ("UserID");
+
+ALTER TABLE "follows" ADD FOREIGN KEY ("FollowedUserId") REFERENCES "users" ("UserID");

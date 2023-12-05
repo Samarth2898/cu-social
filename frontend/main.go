@@ -22,7 +22,7 @@ type FeedObject struct {
 
 func main() {
 	r := gin.Default()
-	r..LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob("templates/*")
 	r.Static("/styles", "./styles")
 	r.Static("/js", "./js")
 	r.Static("/images", "./images")
@@ -61,6 +61,16 @@ func main() {
 	r.GET("/feed", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "feed.html", gin.H{
 			"FeedObjects": FeedObjectInstance,
+		})
+	})
+
+	r.GET("/add_post", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "add_post.html", gin.H{})
+	})
+
+	r.GET("/profile", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "profile.html", gin.H{
+			"PostObjects": FeedObjectInstance,
 		})
 	})
 
