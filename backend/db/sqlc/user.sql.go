@@ -14,7 +14,9 @@ INSERT INTO users (
   username,
   hashed_password,
   full_name,
-  email
+  email,
+  profile_picture,
+  biography
 ) VALUES (
   $1, $2, $3, $4
 )
@@ -26,6 +28,8 @@ type CreateUserParams struct {
 	HashedPassword string `json:"hashed_password"`
 	FullName       string `json:"full_name"`
 	Email          string `json:"email"`
+	ProfilePicture string `json:"profile_picture"`
+	Biography      string `json:"biography"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
