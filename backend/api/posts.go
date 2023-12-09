@@ -91,6 +91,7 @@ func (server *Server) getPosts(ctx *gin.Context) {
 		FROM Posts p
 		INNER JOIN follows f ON p.user_id = f.following_user_id
 		WHERE f.followed_user_id = $1
+		ORDER BY p.created_at DESC
 		`
 
 	rows, err := db.Query(query, userID)
