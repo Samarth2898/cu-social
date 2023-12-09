@@ -10,7 +10,7 @@ CREATE TABLE "users" (
   "profile_picture" varchar,
   "biography" text,
   "email" varchar,
-  "created_at" timestamp
+  "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE "posts" (
@@ -20,7 +20,7 @@ CREATE TABLE "posts" (
   "video_url" text,
   "user_id" integer,
   "status" varchar,
-  "created_at" timestamp
+  "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE "posts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");

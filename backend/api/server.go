@@ -40,6 +40,8 @@ func (server *Server) setupRouter() {
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 
+	router.GET("/users/:userID/posts", server.getPosts)
+
 	fmt.Println(authRoutes)
 	server.router = router
 }
