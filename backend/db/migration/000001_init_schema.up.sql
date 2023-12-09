@@ -1,6 +1,7 @@
 CREATE TABLE "follows" (
   "following_user_id" integer,
-  "followed_user_id" integer
+  "followed_user_id" integer,
+  PRIMARY KEY ("following_user_id", "followed_user_id")
 );
 
 CREATE TABLE "users" (
