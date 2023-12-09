@@ -27,20 +27,12 @@ func main() {
 	r.Static("/js", "./js")
 	r.Static("/images", "./images")
 
-	books := make([]Book, 0)
-	books = append(books, Book{
-		Title:  "Title 1",
-		Author: "Author 1",
-	})
-	books = append(books, Book{
-		Title:  "Title 2",
-		Author: "Author 2",
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "signup.html", gin.H{})
 	})
 
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "gin-test.html", gin.H{
-			"books": books,
-		})
+	r.GET("/login", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "login.html", gin.H{})
 	})
 
 	FeedObjectInstance := make([]FeedObject, 0)
