@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,6 +34,9 @@ const (
 )
 
 func main() {
+
+	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "sa.json")
+
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/styles", "./styles")
@@ -61,6 +69,10 @@ func main() {
 		c.HTML(http.StatusOK, "profile.html", gin.H{
 			"PostObjects": FeedObjectInstance,
 		})
+	})
+
+	r.POST("/uploadVideo", func(c *gin.Context) {
+		uploadVideoFunc(c)
 	})
 
 	log.Fatal(r.Run(":3000"))
@@ -128,4 +140,68 @@ func getProfileFeed(userID int) *[]FeedObject {
 
 	return &posts
 
+}
+
+func uploadVideoFunc(c *gin.Context) {
+
+	bucketName := "cusocial"
+
+	ctx := context.Background()
+
+	file, handler, err := c.Request.FormFile("videoFile")
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error retrieving file")
+		return
+	}
+	defer file.Close()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to create GCS client")
+		return
+	}
+	defer client.Close()
+
+	objectName := handler.Filename
+	obj := client.Bucket(bucketName).Object(objectName)
+	wObj := obj.NewWriter(ctx)
+	defer wObj.Close()
+
+	if _, err := io.Copy(wObj, file); err != nil {
+		c.String(http.StatusInternalServerError, "Error uploading file to GCS")
+		return
+	}
+
+	if err := wObj.Close(); err != nil {
+		c.String(http.StatusInternalServerError, "Error closing GCS writer")
+		return
+	}
+
+	attrs, err := obj.Attrs(ctx)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error getting file attributes")
+		return
+	}
+	fmt.Println(attrs)
+	// url := attrs.MediaLink
+
+	opts := &storage.SignedURLOptions{
+		Scheme:      storage.SigningSchemeV4,
+		Method:      "GET",
+		Expires:     time.Now().Add(40 * time.Minute),
+		ContentType: attrs.ContentType,
+	}
+	streamURL, err := client.Bucket(bucketName).SignedURL(objectName, opts)
+	if err != nil {
+		fmt.Println(err)
+		c.String(http.StatusInternalServerError, "Error generating signed URL")
+		return
+	}
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error generating signed URL")
+		return
+	}
+
+	c.String(http.StatusOK, "File uploaded successfully! URL: %s", streamURL)
+	c.Redirect(http.StatusMovedPermanently, "/feed")
 }
