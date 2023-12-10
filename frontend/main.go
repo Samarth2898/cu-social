@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
@@ -201,31 +200,8 @@ func uploadVideoFunc(c *gin.Context) {
 		return
 	}
 
-	attrs, err := obj.Attrs(ctx)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error getting file attributes")
-		return
-	}
-	fmt.Println(attrs)
-	// url := attrs.MediaLink
+	url := fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, objectName)
 
-	opts := &storage.SignedURLOptions{
-		Scheme:      storage.SigningSchemeV4,
-		Method:      "GET",
-		Expires:     time.Now().Add(40 * time.Minute),
-		ContentType: attrs.ContentType,
-	}
-	streamURL, err := client.Bucket(bucketName).SignedURL(objectName, opts)
-	if err != nil {
-		fmt.Println(err)
-		c.String(http.StatusInternalServerError, "Error generating signed URL")
-		return
-	}
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error generating signed URL")
-		return
-	}
-
-	c.String(http.StatusOK, "File uploaded successfully! URL: %s", streamURL)
+	c.String(http.StatusOK, "File uploaded successfully! URL: %s", url)
 	c.Redirect(http.StatusMovedPermanently, "/feed")
 }
