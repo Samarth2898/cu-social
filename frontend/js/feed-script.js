@@ -1,32 +1,30 @@
-// Define the API endpoint for the profile image
-const apiUrl = 'https://picsum.photos/200/300'; // Replace with your actual API endpoint
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
 
-// Function to fetch the profile image
-function updateProfileImage() {
-    // Find the <a> element by its class name
-    const profilePhotoLink = document.querySelector('.profile-photo');
+// Add an event listener to the search input
+searchInput.addEventListener('input', function(event) {
+    const searchText = event.target.value.toLowerCase().trim();
+    // Perform a search based on the searchText
+    // You can use AJAX/fetch requests to get data from the server or use client-side data
 
-    // Check if the <a> element exists
-    if (profilePhotoLink) {
-        // Fetch the profile image from the API
-        fetch(apiUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.blob();
-            })
-            .then(imageBlob => {
-                const imageUrl = URL.createObjectURL(imageBlob);
-                
-                // Update the href attribute of the <a> element with the image URL
-                profilePhotoLink.setAttribute('href', imageUrl);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    }
+    // For example, if you have an array of items to search from
+    const itemsToSearch = ['Item 1', 'Item 2', 'Item 3']; // Replace this with your data source
+    const filteredItems = itemsToSearch.filter(item => item.toLowerCase().includes(searchText));
+
+    // Display the search results
+    displaySearchResults(filteredItems);
+});
+
+// Function to display search results
+function displaySearchResults(results) {
+    searchResults.innerHTML = ''; // Clear previous results
+    results.forEach(result => {
+        const li = document.createElement('li');
+        li.textContent = result;
+        searchResults.appendChild(li);
+    });
 }
+
 
 // Call the function to update the profile image
 updateProfileImage();

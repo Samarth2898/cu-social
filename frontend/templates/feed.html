@@ -3,7 +3,73 @@
 <head>
     <!-- Other head content -->
     <!-- Link to external JavaScript file -->
-    <script src="../js/feed-script.js"></script>
+    <!-- <script src="../js/feed-script.js"></script> -->
+    <!-- <style>
+        /* Basic styling for demonstration */
+        #searchContainer {
+            position: relative;
+            width: 300px;
+            margin-bottom: 10px;
+        }
+        #searchInput {
+            padding: 8px;
+            width: 100%;
+        }
+        #searchResults {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1;
+        }
+        #searchResults.visible {
+            display: block;
+        }
+    </style> -->
+    <script>
+        // JavaScript code
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+
+            const itemsToSearch = [
+                'Apple',
+                'Banana',
+                'Orange',
+                'Mango',
+                'Grapes',
+                'Pineapple',
+                'Strawberry',
+                'Watermelon'
+            ];
+
+            searchInput.addEventListener('input', function(event) {
+                const searchText = event.target.value.toLowerCase().trim();
+                const filteredItems = itemsToSearch.filter(item => item.toLowerCase().includes(searchText));
+                const topResults = filteredItems.slice(0, 3); // Limit to top 5 results
+                displaySearchResults(topResults);
+            });
+
+            function displaySearchResults(results) {
+                searchResults.innerHTML = ''; // Clear previous results
+                results.forEach(result => {
+                    const li = document.createElement('li');
+                    const button = document.createElement('button');
+                    button.textContent = result;
+                    button.addEventListener('click', function() {
+                        alert('You clicked: ' + result);
+                        // You can perform any action here when the button is clicked
+                    });
+                    li.appendChild(button);
+                    searchResults.appendChild(li);
+                });
+            }
+        });
+    </script>
     <link rel="stylesheet" type="text/css" href="../styles/styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
@@ -18,8 +84,14 @@
             <form action="/search" method="POST">
                 <input type="hidden" name="csrfmiddlewaretoken" value="">
                 <div class="search-bar">
-                    <input type="search" placeholder="Search for other users" name="username">
-                    <button type="submit"><i class="uil uil-search"></i></button>
+                    <!-- <input type="search" placeholder="Search for other users" name="username">
+                    <button type="submit"><i class="uil uil-search"></i></button> -->
+                    <input type="text" id="searchInput" placeholder="Search for other users" name="username">
+                    <ul id="searchResults"></ul>
+                    <!-- <input type="text" id="searchInput" placeholder="Search...">
+                    <ul id="searchResults"></ul> -->
+                    <!-- <ul id="searchResults"></ul> -->
+                    <!-- <button type="submit"><i class="uil uil-search"></i></button> -->
                 </div>
             </form>
 

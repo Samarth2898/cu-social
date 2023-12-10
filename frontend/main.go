@@ -334,7 +334,7 @@ func uploadVideoFunc(c *gin.Context) {
 
 func uploadProfilePhoto(c *gin.Context) string {
 
-	bucketName := "cusocialtest"
+	bucketName := "cusocial"
 
 	ctx := context.Background()
 
