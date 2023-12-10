@@ -5,14 +5,30 @@
 package db
 
 import (
-	"time"
+	"database/sql"
 )
 
+type Follow struct {
+	FollowingUserID int32 `json:"following_user_id"`
+	FollowedUserID  int32 `json:"followed_user_id"`
+}
+
+type Post struct {
+	PostID      int32          `json:"post_id"`
+	Title       sql.NullString `json:"title"`
+	Description sql.NullString `json:"description"`
+	VideoUrl    sql.NullString `json:"video_url"`
+	UserID      sql.NullInt32  `json:"user_id"`
+	Status      sql.NullString `json:"status"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+}
+
 type User struct {
-	Username          string    `json:"username"`
-	HashedPassword    string    `json:"hashed_password"`
-	FullName          string    `json:"full_name"`
-	Email             string    `json:"email"`
-	PasswordChangedAt time.Time `json:"password_changed_at"`
-	CreatedAt         time.Time `json:"created_at"`
+	UserID         int32          `json:"user_id"`
+	Username       sql.NullString `json:"username"`
+	Password       sql.NullString `json:"password"`
+	ProfilePicture sql.NullString `json:"profile_picture"`
+	Biography      sql.NullString `json:"biography"`
+	Email          sql.NullString `json:"email"`
+	CreatedAt      sql.NullTime   `json:"created_at"`
 }

@@ -7,64 +7,56 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
   username,
-  hashed_password,
-  full_name,
-  email,
-  profile_picture,
-  biography
+  password,
+  email
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3
 )
-RETURNING username, hashed_password, full_name, email, password_changed_at, created_at
+RETURNING user_id, username, password, profile_picture, biography, email, created_at
 `
 
 type CreateUserParams struct {
-	Username       string `json:"username"`
-	HashedPassword string `json:"hashed_password"`
-	FullName       string `json:"full_name"`
-	Email          string `json:"email"`
-	ProfilePicture string `json:"profile_picture"`
-	Biography      string `json:"biography"`
+	Username sql.NullString `json:"username"`
+	Password sql.NullString `json:"password"`
+	Email    sql.NullString `json:"email"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
-		arg.Username,
-		arg.HashedPassword,
-		arg.FullName,
-		arg.Email,
-	)
+	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.Password, arg.Email)
 	var i User
 	err := row.Scan(
+		&i.UserID,
 		&i.Username,
-		&i.HashedPassword,
-		&i.FullName,
+		&i.Password,
+		&i.ProfilePicture,
+		&i.Biography,
 		&i.Email,
-		&i.PasswordChangedAt,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT username, hashed_password, full_name, email, password_changed_at, created_at FROM users
+SELECT user_id, username, password, profile_picture, biography, email, created_at FROM users
 WHERE username = $1 LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, username sql.NullString) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, username)
 	var i User
 	err := row.Scan(
+		&i.UserID,
 		&i.Username,
-		&i.HashedPassword,
-		&i.FullName,
+		&i.Password,
+		&i.ProfilePicture,
+		&i.Biography,
 		&i.Email,
-		&i.PasswordChangedAt,
 		&i.CreatedAt,
 	)
 	return i, err

@@ -33,12 +33,12 @@ func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 		return false
 	}
 
-	err := util.CheckPassword(e.password, arg.HashedPassword)
+	err := util.CheckPassword(e.password, arg.Password.String)
 	if err != nil {
 		return false
 	}
 
-	e.arg.HashedPassword = arg.HashedPassword
+	e.arg.Password = arg.Password
 	return reflect.DeepEqual(e.arg, arg)
 }
 
@@ -62,15 +62,13 @@ func TestCreateUserAPI(t *testing.T) {
 		{
 			name: "OK",
 			body: gin.H{
-				"username":  user.Username,
-				"password":  password,
-				"full_name": user.FullName,
-				"email":     user.Email,
+				"username": user.Username,
+				"password": password,
+				"email":    user.Email,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				arg := db.CreateUserParams{
 					Username: user.Username,
-					FullName: user.FullName,
 					Email:    user.Email,
 				}
 				store.EXPECT().
@@ -86,10 +84,9 @@ func TestCreateUserAPI(t *testing.T) {
 		{
 			name: "InternalError",
 			body: gin.H{
-				"username":  user.Username,
-				"password":  password,
-				"full_name": user.FullName,
-				"email":     user.Email,
+				"username": user.Username,
+				"password": password,
+				"email":    user.Email,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -104,10 +101,9 @@ func TestCreateUserAPI(t *testing.T) {
 		{
 			name: "DuplicateUsername",
 			body: gin.H{
-				"username":  user.Username,
-				"password":  password,
-				"full_name": user.FullName,
-				"email":     user.Email,
+				"username": user.Username,
+				"password": password,
+				"email":    user.Email,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -122,10 +118,9 @@ func TestCreateUserAPI(t *testing.T) {
 		{
 			name: "InvalidUsername",
 			body: gin.H{
-				"username":  "invalid-user#1",
-				"password":  password,
-				"full_name": user.FullName,
-				"email":     user.Email,
+				"username": "invalid-user#1",
+				"password": password,
+				"email":    user.Email,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -139,10 +134,9 @@ func TestCreateUserAPI(t *testing.T) {
 		{
 			name: "InvalidEmail",
 			body: gin.H{
-				"username":  user.Username,
-				"password":  password,
-				"full_name": user.FullName,
-				"email":     "invalid-email",
+				"username": user.Username,
+				"password": password,
+				"email":    "invalid-email",
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -156,10 +150,9 @@ func TestCreateUserAPI(t *testing.T) {
 		{
 			name: "TooShortPassword",
 			body: gin.H{
-				"username":  user.Username,
-				"password":  "123",
-				"full_name": user.FullName,
-				"email":     user.Email,
+				"username": user.Username,
+				"password": "123",
+				"email":    user.Email,
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
@@ -205,10 +198,9 @@ func randomUser(t *testing.T) (user db.User, password string) {
 	require.NoError(t, err)
 
 	user = db.User{
-		Username:       util.RandomOwner(),
-		HashedPassword: hashedPassword,
-		FullName:       util.RandomOwner(),
-		Email:          util.RandomEmail(),
+		Username: sql.NullString{String: util.RandomOwner(), Valid: true},
+		Password: sql.NullString{String: hashedPassword, Valid: true},
+		Email:    sql.NullString{String: util.RandomEmail(), Valid: true},
 	}
 	return
 }
@@ -222,7 +214,6 @@ func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
 
 	require.NoError(t, err)
 	require.Equal(t, user.Username, gotUser.Username)
-	require.Equal(t, user.FullName, gotUser.FullName)
 	require.Equal(t, user.Email, gotUser.Email)
-	require.Empty(t, gotUser.HashedPassword)
+	require.Empty(t, gotUser.Password)
 }

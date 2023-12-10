@@ -36,11 +36,6 @@ func RandomOwner() string {
 	return RandomString(6)
 }
 
-// generates random amount of money.
-func RandomMoney() int64 {
-	return RandomInt(0, 1000)
-}
-
 // generate random email
 func RandomEmail() string {
 	return fmt.Sprintf("%s@gmail.com", RandomString(6))

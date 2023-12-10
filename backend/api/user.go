@@ -15,27 +15,22 @@ import (
 type createUserRequest struct {
 	Username       string `json:"username" binding:"required,alphanum"`
 	Password       string `json:"password" binding:"required,min=6"`
-	FullName       string `json:"full_name" binding:"required"`
 	Email          string `json:"email" binding:"required,email"`
 	ProfilePicture string `json:"profile_picture"`
 	Biography      string `json:"biography"`
 }
 
 type userResponse struct {
-	Username          string    `json:"username"`
-	FullName          string    `json:"full_name"`
-	Email             string    `json:"email"`
-	PasswordChangedAt time.Time `json:"password_changed_at"`
-	CreatedAt         time.Time `json:"created_at"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func newUserResponse(user db.User) userResponse {
 	return userResponse{
-		Username:          user.Username,
-		FullName:          user.FullName,
-		Email:             user.Email,
-		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt:         user.CreatedAt,
+		Username:  user.Username.String,
+		Email:     user.Email.String,
+		CreatedAt: user.CreatedAt.Time,
 	}
 }
 
@@ -52,12 +47,9 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	arg := db.CreateUserParams{
-		Username:       req.Username,
-		HashedPassword: hashedPassword,
-		FullName:       req.FullName,
-		Email:          req.Email,
-		ProfilePicture: req.ProfilePicture,
-		Biography:      req.Biography,
+		Username: sql.NullString{String: req.Username, Valid: true},
+		Password: sql.NullString{String: hashedPassword, Valid: true},
+		Email:    sql.NullString{String: req.Email, Valid: true},
 	}
 
 	user, err := server.store.CreateUser(ctx, arg)
@@ -94,7 +86,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := server.store.GetUser(ctx, req.Username)
+	user, err := server.store.GetUser(ctx, sql.NullString{String: req.Username, Valid: true})
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errResponse(err))
@@ -104,14 +96,14 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	err = util.CheckPassword(req.Password, user.HashedPassword)
+	err = util.CheckPassword(req.Password, user.Password.String)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, errResponse(err))
 		return
 	}
 
 	accessToken, _, err := server.tokenMaker.CreateToken(
-		user.Username,
+		user.Username.String,
 		server.config.AccessTokenDuration,
 	)
 	if err != nil {
