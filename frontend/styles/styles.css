@@ -5,7 +5,7 @@
     --dark-color-lightness: 17%;
     --light-color-lightness: 95%;
     --color-white: hsl(252, 30%, 100%);
-    --color-light: hsl(252, 30%, 95%);
+    --color-light: hsl(120, 1%, 64%); 
     --color-gray: hsl(252, 15%, 65%);
     --color-primary: hsl(37, 41%, 65%);
     --color-secondary: hsl(252, 100%, 90%);

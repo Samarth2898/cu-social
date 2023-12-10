@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	helper "cu-social/helper"
+	helper "cu-social/lib"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,15 +10,19 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
 )
 
 // Book ...
-type Book struct {
-	Title  string
-	Author string
+type userResponse struct {
+	UserId    int32     `json:"user_id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type FeedObject struct {
@@ -27,6 +31,28 @@ type FeedObject struct {
 	Title       string `json:"title" db:"title"`
 	UserID      int    `json:"user_id" db:"user_id"`
 	PostedBy    string `json:"username" db:"username"`
+}
+
+type UserSignupRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserSignupResponse struct {
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at"`
+}
+
+type UserLoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type UserLoginResponse struct {
+	AccessToken string       `json:"access_token"`
+	User        userResponse `json:"user"`
 }
 
 const (
@@ -47,7 +73,38 @@ func main() {
 		c.HTML(http.StatusOK, "signup.html", gin.H{})
 	})
 
-	r.GET("/login", func(c *gin.Context) {
+	r.POST("/login-user", func(c *gin.Context) {
+		username := c.PostForm("username")
+		password := c.PostForm("password")
+		fmt.Println("username: ", username, "password: ", password)
+		loginReqBody := UserLoginRequest{
+			Username: username,
+			Password: password,
+		}
+
+		marshalledLoginBody, _ := json.Marshal(loginReqBody)
+		res, err := helper.PostReq("http://0.0.0.0:8080/users/login", marshalledLoginBody)
+		if err != nil {
+			fmt.Println("error sending POST request: ", err.Error())
+		}
+		defer res.Body.Close()
+
+		postLoginResponse := &UserLoginResponse{}
+		derr := json.NewDecoder(res.Body).Decode(postLoginResponse)
+		if derr != nil {
+			panic(derr)
+		}
+		fmt.Println("logged in: ", postLoginResponse.User.UserId, postLoginResponse.AccessToken)
+		if res.Status == "200 OK" {
+			fmt.Println("setting creds")
+			c.Redirect(http.StatusSeeOther, "/feed?access_token="+postLoginResponse.AccessToken+"&user_id="+strconv.Itoa(int(postLoginResponse.User.UserId)))
+		} else {
+			c.Set("isAuthenticated", false)
+			c.HTML(http.StatusBadRequest, "login.html", gin.H{})
+		}
+	})
+
+	r.GET("/login-page", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{})
 	})
 
@@ -56,11 +113,7 @@ func main() {
 		email := c.PostForm("email")
 		password := c.PostForm("password")
 
-		reqBody := struct {
-			Username string
-			Email    string
-			Password string
-		}{
+		reqBody := UserSignupRequest{
 			Username: username,
 			Email:    email,
 			Password: password,
@@ -70,12 +123,56 @@ func main() {
 		if err != nil {
 			fmt.Println("error sending POST request: ", err.Error())
 		}
-		fmt.Println(res.Status)
-		c.HTML(http.StatusOK, "create_user_profile.html", gin.H{})
+		defer res.Body.Close()
+
+		postResponse := &UserSignupResponse{}
+		derr := json.NewDecoder(res.Body).Decode(postResponse)
+		if derr != nil {
+			fmt.Println("error decoding signup response: ", derr.Error())
+		}
+
+		fmt.Println("signed user: ", postResponse.Username, res.StatusCode)
+		loginReqBody := UserLoginRequest{
+			Username: postResponse.Username,
+			Password: password,
+		}
+
+		marshalledLoginBody, _ := json.Marshal(loginReqBody)
+		res, err = helper.PostReq("http://0.0.0.0:8080/users/login", marshalledLoginBody)
+		if err != nil {
+			fmt.Println("error sending POST request: ", err.Error())
+		}
+		defer res.Body.Close()
+
+		postLoginResponse := &UserLoginResponse{}
+		derr = json.NewDecoder(res.Body).Decode(postLoginResponse)
+		if derr != nil {
+			panic(derr)
+		}
+		fmt.Println("logged in: ", postLoginResponse.User.UserId, postLoginResponse.AccessToken)
+		if res.Status == "200 OK" {
+			fmt.Println("setting creds")
+			c.HTML(http.StatusOK, "create_user_profile.html", gin.H{
+				"is_authenticated": true,
+				"access_token":     postLoginResponse.AccessToken,
+				"user_id":          postLoginResponse.User.UserId,
+			})
+		} else {
+			c.HTML(http.StatusBadRequest, "create_user_profile.html", gin.H{
+				"is_authenticated": false,
+			})
+		}
+	})
+
+	r.POST("/submit-profile", func(c *gin.Context) {
+		userID, _ := strconv.Atoi(c.Query("user_id"))
+		url := uploadProfilePhoto(c)
+		bio := c.PostForm("userBio")
+		fmt.Println("inside submit-profile: ", userID, url, bio)
 	})
 
 	r.GET("/feed", func(c *gin.Context) {
-		userID := 4 // samy get userID from JWT token
+		userID, _ := strconv.Atoi(c.Query("user_id"))
 		FeedObjectInstance := getFeedByUser(userID)
 		c.HTML(http.StatusOK, "feed.html", gin.H{
 			"FeedObjects": FeedObjectInstance,
@@ -204,4 +301,44 @@ func uploadVideoFunc(c *gin.Context) {
 
 	c.String(http.StatusOK, "File uploaded successfully! URL: %s", url)
 	c.Redirect(http.StatusMovedPermanently, "/feed")
+}
+
+func uploadProfilePhoto(c *gin.Context) string {
+
+	bucketName := "cusocialtest"
+
+	ctx := context.Background()
+
+	file, handler, err := c.Request.FormFile("imageFile")
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error retrieving file")
+		return ""
+	}
+	defer file.Close()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to create GCS client")
+		return ""
+	}
+	defer client.Close()
+
+	objectName := handler.Filename
+	obj := client.Bucket(bucketName).Object(objectName)
+	wObj := obj.NewWriter(ctx)
+	defer wObj.Close()
+
+	if _, err := io.Copy(wObj, file); err != nil {
+		c.String(http.StatusInternalServerError, "Error uploading file to GCS")
+		return ""
+	}
+
+	if err := wObj.Close(); err != nil {
+		c.String(http.StatusInternalServerError, "Error closing GCS writer")
+		return ""
+	}
+
+	url := fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, objectName)
+
+	return url
 }

@@ -1,4 +1,4 @@
-package helper
+package h
 
 import (
 	"bytes"
@@ -20,8 +20,6 @@ func PostReq(postUrl string, body []byte) (response *http.Response, err error) {
 	if err != nil {
 		panic(err)
 	}
-
-	defer res.Body.Close()
 
 	return res, err
 }
