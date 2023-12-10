@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Other head content -->
-    <!-- Link to external JavaScript file -->
-    <!-- <script src="../js/feed-script.js"></script> -->
-    <!-- <style>
+    
+    <style>
         /* Basic styling for demonstration */
         #searchContainer {
             position: relative;
@@ -17,11 +15,12 @@
         }
         #searchResults {
             position: absolute;
-            top: 100%;
-            left: 0;
+            /* top: calc(100% + 5px); */
+            /* margin-left: 200px; */
             background-color: #fff;
             border: 1px solid #ccc;
             max-height: 150px;
+            width: 100px;
             overflow-y: auto;
             display: none;
             z-index: 1;
@@ -29,7 +28,24 @@
         #searchResults.visible {
             display: block;
         }
-    </style> -->
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            padding: 5px;
+            cursor: pointer;
+        }
+        button {
+            padding: 5px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            border: none;
+            background: none;
+        }
+    </style>
     <script>
         // JavaScript code
         document.addEventListener('DOMContentLoaded', function() {
@@ -50,24 +66,36 @@
             searchInput.addEventListener('input', function(event) {
                 const searchText = event.target.value.toLowerCase().trim();
                 const filteredItems = itemsToSearch.filter(item => item.toLowerCase().includes(searchText));
-                const topResults = filteredItems.slice(0, 3); // Limit to top 5 results
+                const topResults = filteredItems.slice(0, 5); // Limit to top 5 results
                 displaySearchResults(topResults);
             });
 
             function displaySearchResults(results) {
                 searchResults.innerHTML = ''; // Clear previous results
-                results.forEach(result => {
-                    const li = document.createElement('li');
-                    const button = document.createElement('button');
-                    button.textContent = result;
-                    button.addEventListener('click', function() {
-                        alert('You clicked: ' + result);
-                        // You can perform any action here when the button is clicked
+                if (results.length > 0) {
+                    searchResults.classList.add('visible'); // Show results container
+                    results.forEach(result => {
+                        const li = document.createElement('li');
+                        const button = document.createElement('button');
+                        button.textContent = result;
+                        button.addEventListener('click', function() {
+                            alert('You clicked: ' + result);
+                            // You can perform any action here when the button is clicked
+                        });
+                        li.appendChild(button);
+                        searchResults.appendChild(li);
                     });
-                    li.appendChild(button);
-                    searchResults.appendChild(li);
-                });
+                } else {
+                    searchResults.classList.remove('visible'); // Hide results container if no results
+                }
             }
+
+            // Close the results on clicking outside the search container
+            document.addEventListener('click', function(event) {
+                if (!document.getElementById('searchContainer').contains(event.target)) {
+                    searchResults.classList.remove('visible');
+                }
+            });
         });
     </script>
     <link rel="stylesheet" type="text/css" href="../styles/styles.css">
@@ -84,14 +112,8 @@
             <form action="/search" method="POST">
                 <input type="hidden" name="csrfmiddlewaretoken" value="">
                 <div class="search-bar">
-                    <!-- <input type="search" placeholder="Search for other users" name="username">
-                    <button type="submit"><i class="uil uil-search"></i></button> -->
                     <input type="text" id="searchInput" placeholder="Search for other users" name="username">
                     <ul id="searchResults"></ul>
-                    <!-- <input type="text" id="searchInput" placeholder="Search...">
-                    <ul id="searchResults"></ul> -->
-                    <!-- <ul id="searchResults"></ul> -->
-                    <!-- <button type="submit"><i class="uil uil-search"></i></button> -->
                 </div>
             </form>
 
@@ -102,10 +124,10 @@
                 <button class="btn btn-primary">
                     <a href="/add_post" style="color: #fff;text-decoration: none;">Create Post</a>
                 </button>
-                <div class="profile-photo" style="cursor:pointer;">
+                <div class="profile-photo" style="cursor:pointer; size: 100;">
                     <a class="profile" href="" style="text-decoration: none;">
                         <!-- Replace with get profile pic image URL -->
-                        <img src="https://picsum.photos/200/300" alt="Profile Picture">
+                        <img src="https://picsum.photos/200/300" alt="Profile Picture" style="size: 100%;">
                     </a>
                 </div>
             </div>
@@ -115,7 +137,7 @@
         <div class="container d-flex justify-content-start">
             <div class="left">
                 <a class="profile" href="/profile" style="text-decoration: none;">
-                    <div class="profile-photo" style="cursor:pointer;">
+                    <div class="profile-photo2" style="cursor:pointer;">
                         <!-- Replace with dynamic user profile pic URL -->
                         <img src="https://picsum.photos/200/300" alt="Profile Picture">
                     </div>

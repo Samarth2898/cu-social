@@ -45,7 +45,7 @@ func (server *Server) setupRouter() {
 	router.PUT("/users/update", server.updateUserInfo)
 	router.GET("/users/:userID/posts", server.getUserPosts)
 	router.GET("/users/:userID/following/posts", server.getPosts)
-	// router.POST("/users/:followerID/follow/:followingID", server.followUser)
+	router.POST("/users/:followerID/follow/:followingID", server.followUser)
 	router.POST("/posts", server.createPost)
 
 	fmt.Println(authRoutes)
