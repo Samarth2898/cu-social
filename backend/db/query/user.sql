@@ -14,7 +14,8 @@ WHERE username = $1 LIMIT 1;
 
 -- name: SearchUsers :many
 SELECT profile_picture, username FROM users
-WHERE user_id <> $1
+WHERE user_id <> $1 
+AND username ilike $2 
 ORDER BY RANDOM()
 LIMIT 10;
 

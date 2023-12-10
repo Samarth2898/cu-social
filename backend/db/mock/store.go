@@ -67,7 +67,7 @@ func (mr *MockStoreMockRecorder) GetUser(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // SearchUsers mocks base method.
-func (m *MockStore) SearchUsers(arg0 context.Context, arg1 int32) ([]db.SearchUsersRow, error) {
+func (m *MockStore) SearchUsers(arg0 context.Context, arg1 db.SearchUsersParams) ([]db.SearchUsersRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SearchUsers", arg0, arg1)
 	ret0, _ := ret[0].([]db.SearchUsersRow)

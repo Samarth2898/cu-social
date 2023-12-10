@@ -12,7 +12,7 @@ import (
 type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetUser(ctx context.Context, username sql.NullString) (User, error)
-	SearchUsers(ctx context.Context, userID int32) ([]SearchUsersRow, error)
+	SearchUsers(ctx context.Context, arg SearchUsersParams) ([]SearchUsersRow, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (int32, error)
 }
 

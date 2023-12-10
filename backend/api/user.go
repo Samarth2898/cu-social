@@ -132,11 +132,13 @@ type searchUserResponse struct {
 }
 
 func (server *Server) searchUsers(ctx *gin.Context) {
-	queryParams := ctx.Request.URL.Query()
-
-	userID := queryParams.Get("user_id")
-	userIDInt, _ := strconv.Atoi(userID)
-	rows, err := server.store.SearchUsers(ctx, int32(userIDInt))
+	userID, _ := strconv.Atoi(ctx.Query("user_id"))
+	searchQuery := ctx.Query("query") + "%"
+	queryReq := db.SearchUsersParams{
+		UserID:   int32(userID),
+		Username: sql.NullString{String: searchQuery, Valid: true},
+	}
+	rows, err := server.store.SearchUsers(ctx, queryReq)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errResponse(err))

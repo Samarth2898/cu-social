@@ -64,18 +64,24 @@ func (q *Queries) GetUser(ctx context.Context, username sql.NullString) (User, e
 
 const searchUsers = `-- name: SearchUsers :many
 SELECT profile_picture, username FROM users
-WHERE user_id <> $1
+WHERE user_id <> $1 
+AND username ilike $2
 ORDER BY RANDOM()
 LIMIT 10
 `
+
+type SearchUsersParams struct {
+	UserID   int32          `json:"user_id"`
+	Username sql.NullString `json:"username"`
+}
 
 type SearchUsersRow struct {
 	ProfilePicture sql.NullString `json:"profile_picture"`
 	Username       sql.NullString `json:"username"`
 }
 
-func (q *Queries) SearchUsers(ctx context.Context, userID int32) ([]SearchUsersRow, error) {
-	rows, err := q.db.QueryContext(ctx, searchUsers, userID)
+func (q *Queries) SearchUsers(ctx context.Context, arg SearchUsersParams) ([]SearchUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchUsers, arg.UserID, arg.Username)
 	if err != nil {
 		return nil, err
 	}
