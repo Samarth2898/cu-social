@@ -65,3 +65,33 @@ func (mr *MockStoreMockRecorder) GetUser(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockStore)(nil).GetUser), arg0, arg1)
 }
+
+// SearchUsers mocks base method.
+func (m *MockStore) SearchUsers(arg0 context.Context, arg1 int32) ([]db.SearchUsersRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchUsers", arg0, arg1)
+	ret0, _ := ret[0].([]db.SearchUsersRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchUsers indicates an expected call of SearchUsers.
+func (mr *MockStoreMockRecorder) SearchUsers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchUsers", reflect.TypeOf((*MockStore)(nil).SearchUsers), arg0, arg1)
+}
+
+// UpdateUser mocks base method.
+func (m *MockStore) UpdateUser(arg0 context.Context, arg1 db.UpdateUserParams) (int32, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUser", arg0, arg1)
+	ret0, _ := ret[0].(int32)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateUser indicates an expected call of UpdateUser.
+func (mr *MockStoreMockRecorder) UpdateUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockStore)(nil).UpdateUser), arg0, arg1)
+}

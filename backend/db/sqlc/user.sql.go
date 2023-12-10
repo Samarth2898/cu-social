@@ -61,3 +61,58 @@ func (q *Queries) GetUser(ctx context.Context, username sql.NullString) (User, e
 	)
 	return i, err
 }
+
+const searchUsers = `-- name: SearchUsers :many
+SELECT profile_picture, username FROM users
+WHERE user_id <> $1
+ORDER BY RANDOM()
+LIMIT 10
+`
+
+type SearchUsersRow struct {
+	ProfilePicture sql.NullString `json:"profile_picture"`
+	Username       sql.NullString `json:"username"`
+}
+
+func (q *Queries) SearchUsers(ctx context.Context, userID int32) ([]SearchUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchUsers, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SearchUsersRow{}
+	for rows.Next() {
+		var i SearchUsersRow
+		if err := rows.Scan(&i.ProfilePicture, &i.Username); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users 
+SET profile_picture = $1, biography = $2
+WHERE user_id = $3
+RETURNING 1
+`
+
+type UpdateUserParams struct {
+	ProfilePicture sql.NullString `json:"profile_picture"`
+	Biography      sql.NullString `json:"biography"`
+	UserID         int32          `json:"user_id"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (int32, error) {
+	row := q.db.QueryRowContext(ctx, updateUser, arg.ProfilePicture, arg.Biography, arg.UserID)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
