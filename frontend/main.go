@@ -55,6 +55,16 @@ type UserLoginResponse struct {
 	User        userResponse `json:"user"`
 }
 
+type UserInfoUpdate struct {
+	ProfilePicture string `json:"profile_picture"`
+	Biography      string `json:"biography"`
+	UserID         int32  `json:"user_id"`
+}
+
+type UserInfoUpdateResponse struct {
+	Success bool `json:"success"`
+}
+
 const (
 	backendServer = "http://localhost:8080"
 )
@@ -166,9 +176,28 @@ func main() {
 
 	r.POST("/submit-profile", func(c *gin.Context) {
 		userID, _ := strconv.Atoi(c.Query("user_id"))
+		access_token := c.Query("access_token")
 		url := uploadProfilePhoto(c)
 		bio := c.PostForm("userBio")
-		fmt.Println("inside submit-profile: ", userID, url, bio)
+		updateReqBody := UserInfoUpdate{
+			UserID:         int32(userID),
+			ProfilePicture: url,
+			Biography:      bio,
+		}
+		marshalledBody, _ := json.Marshal(updateReqBody)
+		res, err := helper.PostReq("http://0.0.0.0:8080/users/update", marshalledBody)
+		if err != nil {
+			fmt.Println("error sending POST request: ", err.Error())
+		}
+		defer res.Body.Close()
+
+		userUpdateResponse := &UserInfoUpdateResponse{}
+		derr := json.NewDecoder(res.Body).Decode(userUpdateResponse)
+		if derr != nil {
+			fmt.Println("error in decoding: ", derr.Error())
+		}
+		fmt.Println("Update status: ", userUpdateResponse.Success)
+		c.Redirect(http.StatusSeeOther, "/feed?access_token="+access_token+"&user_id="+strconv.Itoa(userID))
 	})
 
 	r.GET("/feed", func(c *gin.Context) {
@@ -309,7 +338,7 @@ func uploadProfilePhoto(c *gin.Context) string {
 
 	ctx := context.Background()
 
-	file, handler, err := c.Request.FormFile("imageFile")
+	file, handler, err := c.Request.FormFile("profileImage")
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error retrieving file")
 		return ""
