@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	helper "cu-social/helper"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -49,6 +50,29 @@ func main() {
 
 	r.GET("/login", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{})
+	})
+
+	r.POST("/submit-signup-form", func(c *gin.Context) {
+		username := c.PostForm("username")
+		email := c.PostForm("email")
+		password := c.PostForm("password")
+
+		reqBody := struct {
+			Username string
+			Email    string
+			Password string
+		}{
+			Username: username,
+			Email:    email,
+			Password: password,
+		}
+		marshalledBody, _ := json.Marshal(reqBody)
+		res, err := helper.PostReq("http://0.0.0.0:8080/users", marshalledBody)
+		if err != nil {
+			fmt.Println("error sending POST request: ", err.Error())
+		}
+		fmt.Println(res.Status)
+		c.HTML(http.StatusOK, "create_user_profile.html", gin.H{})
 	})
 
 	r.GET("/feed", func(c *gin.Context) {
