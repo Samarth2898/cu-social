@@ -196,7 +196,7 @@ func main() {
 			Biography:      bio,
 		}
 		marshalledBody, _ := json.Marshal(updateReqBody)
-		res, err := helper.PostReq("http://0.0.0.0:8080/users/update", marshalledBody)
+		res, err := helper.PutReq("http://0.0.0.0:8080/users/update", marshalledBody)
 		if err != nil {
 			fmt.Println("error sending POST request: ", err.Error())
 		}
