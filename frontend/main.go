@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	helper "cu-social/lib"
 	"encoding/json"
@@ -23,6 +24,17 @@ type userResponse struct {
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type Post struct {
+	PostID         int    `json:"post_id" db:"post_id"`
+	Title          string `json:"title" db:"title"`
+	Description    string `json:"description" db:"description"`
+	VideoURL       string `json:"video_url" db:"video_url"`
+	UserID         int    `json:"user_id" db:"user_id"`
+	Status         string `json:"status" db:"status"`
+	CreatedAt      string `json:"created_at" db:"created_at"`
+	ProfilePicture string `json:"profile_picture" db:"profile_picture"`
 }
 
 type User struct {
@@ -394,6 +406,46 @@ func uploadVideoFunc(c *gin.Context) {
 	url := fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, objectName)
 
 	c.String(http.StatusOK, "File uploaded successfully! URL: %s", url)
+
+	url = fmt.Sprintf("%s/post", backendServer) // Replace with your server URL
+
+	postTitle := c.Request.FormValue("title")
+	postDescription := c.Request.FormValue("description")
+
+	postData := Post{
+		Title:       postTitle,
+		Description: postDescription,
+		VideoURL:    url, // Replace with the actual video URL
+		UserID:      1,
+		Status:      "Uploaded",
+	}
+
+	postBody, err := json.Marshal(postData)
+	if err != nil {
+		fmt.Println("Error marshalling JSON:", err)
+		return
+	}
+
+	fmt.Println(postBody)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(postBody))
+	if err != nil {
+		fmt.Println("Error creating HTTP request:", err)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	httpclient := &http.Client{}
+	resp, err := httpclient.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("Response Status:", resp.Status)
+
 	c.Redirect(http.StatusMovedPermanently, "/feed")
 }
 
