@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cusocial-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cusocial-frontend
+  template:
+    metadata:
+      labels:
+        app: cusocial-frontend
+    spec:
+      containers:
+        - name: cusocial-frontend
+          image: samarth2898/cusocial-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              protocol: TCP

@@ -232,7 +232,7 @@ func main() {
 	})
 
 	r.GET("/profile", func(c *gin.Context) {
-		userID := 4 // samy get userID from JWT token
+		userID := 2 // samy get userID from JWT token
 		FeedObjectInstance := getProfileFeed(userID)
 		c.HTML(http.StatusOK, "profile.html", gin.H{
 			"PostObjects": FeedObjectInstance,

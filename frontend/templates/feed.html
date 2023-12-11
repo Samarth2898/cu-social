@@ -52,7 +52,7 @@
             const searchInput = document.getElementById('searchInput');
             const searchResults = document.getElementById('searchResults');
 
-            const endpointUrl = 'http://0.0.0.0:8080/users/list'; // Replace with your actual endpoint URL
+            const endpointUrl = 'http://localhost:8080/users/list'; // Replace with your actual endpoint URL
 
             var users = []
             var usernames = []
@@ -136,14 +136,13 @@
             </form>
 
             <div class="create">
-                <a href="/">logout</a>
-                <a href="/">Signup</a>
-                <a href="/login-page">Login</a>
+                <a href="/login-page">logout</a>
+                <a href="/feed"> Feed</a>
                 <button class="btn btn-primary">
                     <a href="/add_post" style="color: #fff;text-decoration: none;">Create Post</a>
                 </button>
                 <div class="profile-photo" style="cursor:pointer; size: 100;">
-                    <a class="profile" href="" style="text-decoration: none;">
+                    <a class="profile" href="/profile" style="text-decoration: none;">
                         <!-- Replace with get profile pic image URL -->
                         <img src="{{ .UserProfile.ProfilePicture }}" alt="Profile Picture" style="size: 100%;">
                     </a>

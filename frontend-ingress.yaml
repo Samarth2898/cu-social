@@ -1,0 +1,37 @@
+#
+# See https://kubernetes.io/docs/concepts/services-networking/ingress/
+#
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  annotations:
+    # use the shared ingress-nginx
+    # kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: "gce"
+    nginx.ingress.kubernetes.io/proxy-body-size: 16m
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: cusocial-frontend-service
+                port:
+                  number: 3000
+            path: /
+            pathType: Prefix
+#
+# Your ingress rules here
+#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cusocial-frontend-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+  selector:
+    app: cusocial-frontend
