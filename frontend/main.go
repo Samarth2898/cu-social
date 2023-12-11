@@ -25,12 +25,23 @@ type userResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type User struct {
+	UserID         int    `db:"user_id" json:"user_id"`
+	Username       string `db:"username" json:"username"`
+	Password       string `db:"password" json:"password"`
+	ProfilePicture string `db:"profile_picture" json:"profile_picture"`
+	Biography      string `db:"biography" json:"biography"`
+	Email          string `db:"email" json:"email"`
+	CreatedAt      string `db:"created_at" json:"created_at"`
+}
+
 type FeedObject struct {
-	Description string `json:"description" db:"description"`
-	VideoURL    string `json:"video_url" db:"video_url"`
-	Title       string `json:"title" db:"title"`
-	UserID      int    `json:"user_id" db:"user_id"`
-	PostedBy    string `json:"username" db:"username"`
+	Description    string `json:"description" db:"description"`
+	ProfilePicture string `json:"profile_picture" db:"profile_picture"`
+	VideoURL       string `json:"video_url" db:"video_url"`
+	Title          string `json:"title" db:"title"`
+	UserID         int    `json:"user_id" db:"user_id"`
+	PostedBy       string `json:"username" db:"username"`
 }
 
 type UserSignupRequest struct {
@@ -202,9 +213,13 @@ func main() {
 
 	r.GET("/feed", func(c *gin.Context) {
 		userID, _ := strconv.Atoi(c.Query("user_id"))
+		userID = 2
+		userProfile := getUser(userID)
+		fmt.Println(userProfile)
 		FeedObjectInstance := getFeedByUser(userID)
 		c.HTML(http.StatusOK, "feed.html", gin.H{
 			"FeedObjects": FeedObjectInstance,
+			"UserProfile": userProfile,
 		})
 	})
 
@@ -216,6 +231,52 @@ func main() {
 		userID := 4 // samy get userID from JWT token
 		FeedObjectInstance := getProfileFeed(userID)
 		c.HTML(http.StatusOK, "profile.html", gin.H{
+			"PostObjects": FeedObjectInstance,
+		})
+	})
+
+	r.GET("/profile1/:userID", func(c *gin.Context) {
+		userIDStr := c.Param("userID")
+		userID, _ := strconv.Atoi(userIDStr)
+		// currentUser := (c.Query("user_id"))
+		// fmt.Println(currentUser)
+		// url := fmt.Sprintf("%s/users/%s/following/%s", backendServer, (currentUser), userIDStr)
+
+		// req, err := http.NewRequest("GET", url, nil)
+		// if err != nil {
+		// 	log.Fatal("Error creating request:", err)
+		// }
+
+		// client := &http.Client{}
+		// resp, err := client.Do(req)
+		// if err != nil {
+		// 	log.Fatal("Error sending request:", err)
+		// }
+		// defer resp.Body.Close()
+
+		// body, err := ioutil.ReadAll(resp.Body)
+		// if err != nil {
+		// 	log.Fatal("Error reading response:", err)
+		// }
+
+		// var response map[string]bool
+		// err = json.Unmarshal(body, &response)
+		// if err != nil {
+		// 	log.Fatal("Error parsing JSON response:", err)
+		// }
+
+		// isFollowing, ok := response["is_following"]
+		// if !ok {
+		// 	log.Fatal("Invalid JSON response format")
+		// }
+
+		// fmt.Print(isFollowing)
+		// if err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		// 	return
+		// }
+		FeedObjectInstance := getProfileFeed(userID)
+		c.HTML(http.StatusOK, "profile1.html", gin.H{
 			"PostObjects": FeedObjectInstance,
 		})
 	})
@@ -370,4 +431,32 @@ func uploadProfilePhoto(c *gin.Context) string {
 	url := fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, objectName)
 
 	return url
+}
+
+func getUser(userID int) *User {
+
+	url := fmt.Sprintf("%s/usersinfo/%d", backendServer, userID)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil
+	}
+
+	var user User
+	if err := json.Unmarshal(body, &user); err != nil {
+		return nil
+	}
+
+	return &user
+
 }

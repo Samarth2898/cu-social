@@ -18,13 +18,14 @@ const (
 )
 
 type Post struct {
-	PostID      int    `json:"post_id" db:"post_id"`
-	Title       string `json:"title" db:"title"`
-	Description string `json:"description" db:"description"`
-	VideoURL    string `json:"video_url" db:"video_url"`
-	UserID      int    `json:"user_id" db:"user_id"`
-	Status      string `json:"status" db:"status"`
-	CreatedAt   string `json:"created_at" db:"created_at"`
+	PostID         int    `json:"post_id" db:"post_id"`
+	Title          string `json:"title" db:"title"`
+	Description    string `json:"description" db:"description"`
+	VideoURL       string `json:"video_url" db:"video_url"`
+	UserID         int    `json:"user_id" db:"user_id"`
+	Status         string `json:"status" db:"status"`
+	CreatedAt      string `json:"created_at" db:"created_at"`
+	ProfilePicture string `json:"profile_picture" db:"profile_picture"`
 }
 
 func (server *Server) getUserPosts(ctx *gin.Context) {
@@ -88,9 +89,10 @@ func (server *Server) getPosts(ctx *gin.Context) {
 
 	// Query posts from users that the specified user is following
 	query := `
-		SELECT p.*
+		SELECT p.*, u.profile_picture
 		FROM Posts p
 		INNER JOIN follows f ON p.user_id = f.following_user_id
+		INNER JOIN users u ON p.user_id = u.user_id
 		WHERE f.followed_user_id = $1
 		ORDER BY p.created_at DESC
 		`
@@ -105,7 +107,7 @@ func (server *Server) getPosts(ctx *gin.Context) {
 	// Iterate through the rows and append posts to the slice
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.PostID, &post.Title, &post.Description, &post.VideoURL, &post.UserID, &post.Status, &post.CreatedAt); err != nil {
+		if err := rows.Scan(&post.PostID, &post.Title, &post.Description, &post.VideoURL, &post.UserID, &post.Status, &post.CreatedAt, &post.ProfilePicture); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan post row"})
 			return
 		}

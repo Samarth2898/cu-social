@@ -34,8 +34,8 @@ INSERT INTO Users (username, email, password, profile_picture, biography)
 SELECT
     'User' || generate_series, -- Username
     'user' || generate_series || '@example.com', -- Email
-    'password' || generate_series, -- Password
-    'profile_pic_url_' || generate_series, -- ProfilePicture
+    '$2a$10$jLO/HQ5ECcpmW2HxVlfiK.u0S6Oe58hsNeOIn5XInyXFg61c8kfxG', -- Password
+    'https://storage.googleapis.com/cusocial/download.png', -- ProfilePicture
     'Biography for user ' || generate_series -- Biography
 FROM generate_series(1, 20);
 
@@ -46,7 +46,7 @@ SELECT
     'Title for post ' || generate_series,
     'Description for post ' || generate_series,
     'Uploaded',
-    'image_video_url_' || generate_series
+    'https://storage.googleapis.com/cusocial/ForBiggerBlazes.mp4'
 FROM Users
 CROSS JOIN generate_series(1, 20);
 

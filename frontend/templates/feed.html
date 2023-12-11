@@ -20,7 +20,7 @@
             background-color: #fff;
             border: 1px solid #ccc;
             max-height: 150px;
-            width: 100px;
+            width: 200px;
             overflow-y: auto;
             display: none;
             z-index: 1;
@@ -52,20 +52,35 @@
             const searchInput = document.getElementById('searchInput');
             const searchResults = document.getElementById('searchResults');
 
-            const itemsToSearch = [
-                'Apple',
-                'Banana',
-                'Orange',
-                'Mango',
-                'Grapes',
-                'Pineapple',
-                'Strawberry',
-                'Watermelon'
-            ];
+            const endpointUrl = 'http://0.0.0.0:8080/users/list'; // Replace with your actual endpoint URL
+
+            var users = []
+            var usernames = []
+            var dictionary = {}
+            fetch(endpointUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data)
+                usernames = data.map(user => user.username);
+                user_id = data.map(user => user.user_id);
+                for (let i = 0; i < usernames.length; i++) {
+                    dictionary[usernames[i]] = user_id[i];
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+            console.log("dictionarty", dictionary)
+
 
             searchInput.addEventListener('input', function(event) {
                 const searchText = event.target.value.toLowerCase().trim();
-                const filteredItems = itemsToSearch.filter(item => item.toLowerCase().includes(searchText));
+                const filteredItems = usernames.filter(item => item.toLowerCase().includes(searchText));
                 const topResults = filteredItems.slice(0, 5); // Limit to top 5 results
                 displaySearchResults(topResults);
             });
@@ -79,8 +94,11 @@
                         const button = document.createElement('button');
                         button.textContent = result;
                         button.addEventListener('click', function() {
-                            alert('You clicked: ' + result);
-                            // You can perform any action here when the button is clicked
+                            alert('You clicked: ' + 'http://0.0.0.0:3000/profile1/' + dictionary[result]);
+                            console.log("diction123", dictionary[result])
+                            // // const foundUser = data.find(user => user.username === result);
+
+                            window.location.href = 'http://0.0.0.0:3000/profile1/' + dictionary[result];
                         });
                         li.appendChild(button);
                         searchResults.appendChild(li);
@@ -109,7 +127,7 @@
             </div>
 
             <!-- Search bar -->
-            <form action="/search" method="POST">
+            <form action="#"> <!--action="" method="POST"-->
                 <input type="hidden" name="csrfmiddlewaretoken" value="">
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="Search for other users" name="username">
@@ -127,7 +145,7 @@
                 <div class="profile-photo" style="cursor:pointer; size: 100;">
                     <a class="profile" href="" style="text-decoration: none;">
                         <!-- Replace with get profile pic image URL -->
-                        <img src="https://picsum.photos/200/300" alt="Profile Picture" style="size: 100%;">
+                        <img src="{{ .UserProfile.ProfilePicture }}" alt="Profile Picture" style="size: 100%;">
                     </a>
                 </div>
             </div>
@@ -139,12 +157,12 @@
                 <a class="profile" href="/profile" style="text-decoration: none;">
                     <div class="profile-photo2" style="cursor:pointer;">
                         <!-- Replace with dynamic user profile pic URL -->
-                        <img src="https://picsum.photos/200/300" alt="Profile Picture">
+                        <img src="{{ .UserProfile.ProfilePicture }}" alt="Profile Picture">
                     </div>
                     <div class="handle">
                         <!-- Replace with dynamic user profile details -->
-                        <h4>User Profile First Name</h4>
-                        <p class="text-muted">User Profile Username</p>
+                        <h4>{{ .UserProfile.Username }}</h4>
+                        <p class="text-muted">{{ .UserProfile.Biography }}</p>
                     </div>
                 </a>
                 <div class="sidebar">
@@ -184,7 +202,7 @@
                                                 <a class="profile" href="/profile" style="text-decoration: none;">
                                                     <div class="profile-photo" style="cursor:pointer;">
                                                         <!-- Replace with dynamic user profile pic URL -->
-                                                        <img src="https://picsum.photos/200/300" alt="Profile Picture">
+                                                        <img src="{{ .ProfilePicture }}" alt="Profile Picture">
                                                     </div>
                                                     <div class="handle">
                                                         <!-- Replace with dynamic user profile details -->

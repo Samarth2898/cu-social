@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="../styles/profile.css">
+    <link rel="stylesheet" type="text/css" href="../styles/styles.css">
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="log">
+                <img src="../images/Colorado_Buffs_logo.png" style="height:75px;cursor:pointer;">
+            </div>
+
+            <!-- Search bar -->
+            <form action="/search" method="POST">
+                <input type="hidden" name="csrfmiddlewaretoken" value="">
+                <div class="search-bar">
+                    <input type="search" placeholder="Search for other users" name="username">
+                    <!-- <button type="submit"><i class="uil uil-search"></i></button> -->
+                </div>
+            </form>
+
+            <div class="create">
+                <a href="/logout">logout</a>
+                <a href="/signup">Signup</a>
+                <a href="/login">Login</a>
+                <button class="btn btn-primary">
+                    <a href="/add_post" style="color: #fff;text-decoration: none;">Create Post</a>
+                </button>
+                <div class="profile-photo" style="cursor:pointer;">
+                    <a class="profile" href="" style="text-decoration: none;">
+                        <!-- Replace with get profile pic image URL -->
+                        <img src="https://picsum.photos/200/300" alt="Profile Picture">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="profile">
+            <div class="profile-header">
+                <img src="https://picsum.photos/200/300" alt="Profile Picture" class="profile-picture">
+                <h1 class="username">John Doe</h1>
+                <p class="user-bio">Front-end Developer</p>
+                <button class="btn btn-primary">
+                    <a href="{{ .followURL }}" style="color: #fff;text-decoration: none;">Follow</a>
+                </button>
+            </div>
+            <div class="posts">
+                <!-- Example post -->
+                {{ range .PostObjects}}
+                    <div class="post">
+                        <video id="shortsVideo" width="720" height="450" autoplay muted loop playsinline>
+                            <source src="{{ .VideoURL }}" type="video/mp4" >
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

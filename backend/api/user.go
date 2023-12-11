@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,6 +13,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
+
+type User struct {
+	UserID         int    `db:"user_id" json:"user_id"`
+	Username       string `db:"username" json:"username"`
+	Password       string `db:"password" json:"password"`
+	ProfilePicture string `db:"profile_picture" json:"profile_picture"`
+	Biography      string `db:"biography" json:"biography"`
+	Email          string `db:"email" json:"email"`
+	CreatedAt      string `db:"created_at" json:"created_at"`
+}
 
 type createUserRequest struct {
 	Username       string `json:"username" binding:"required,alphanum"`
@@ -131,35 +142,71 @@ type searchUserResponse struct {
 	UserData []UserData `json:"user_data"`
 }
 
+// func (server *Server) searchUsers(ctx *gin.Context) {
+// 	userID, _ := strconv.Atoi(ctx.Query("user_id"))
+// 	searchQuery := ctx.Query("query") + "%"
+// 	queryReq := db.SearchUsersParams{
+// 		UserID:   int32(userID),
+// 		Username: sql.NullString{String: searchQuery, Valid: true},
+// 	}
+// 	rows, err := server.store.SearchUsers(ctx, queryReq)
+// 	if err != nil {
+// 		if err == sql.ErrNoRows {
+// 			ctx.JSON(http.StatusNotFound, errResponse(err))
+// 			return
+// 		}
+// 		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+// 		return
+// 	}
+// 	var userInfo []UserData
+
+// 	for _, row := range rows {
+// 		var currentUser UserData
+// 		currentUser.Username = row.Username.String
+// 		currentUser.ProfilePicture = row.ProfilePicture.String
+// 		userInfo = append(userInfo, currentUser)
+// 	}
+
+// 	rsp := searchUserResponse{
+// 		UserData: userInfo,
+// 	}
+// 	ctx.JSON(http.StatusOK, rsp)
+// }
+
 func (server *Server) searchUsers(ctx *gin.Context) {
-	userID, _ := strconv.Atoi(ctx.Query("user_id"))
-	searchQuery := ctx.Query("query") + "%"
-	queryReq := db.SearchUsersParams{
-		UserID:   int32(userID),
-		Username: sql.NullString{String: searchQuery, Valid: true},
-	}
-	rows, err := server.store.SearchUsers(ctx, queryReq)
+	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", username, password, pgaddress, dbname))
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errResponse(err))
+		fmt.Println("Error connecting to the database:", err)
 		return
 	}
-	var userInfo []UserData
+	defer db.Close()
 
-	for _, row := range rows {
-		var currentUser UserData
-		currentUser.Username = row.Username.String
-		currentUser.ProfilePicture = row.ProfilePicture.String
-		userInfo = append(userInfo, currentUser)
+	var users []User
+
+	query := "SELECT * FROM users"
+	rows, err := db.Query(query)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users"})
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user User
+		err := rows.Scan(&user.UserID, &user.Username, &user.Password, &user.ProfilePicture, &user.Biography, &user.Email, &user.CreatedAt)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan users"})
+			return
+		}
+		users = append(users, user)
+	}
+	if err := rows.Err(); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to iterate over users"})
+		return
 	}
 
-	rsp := searchUserResponse{
-		UserData: userInfo,
-	}
-	ctx.JSON(http.StatusOK, rsp)
+	ctx.JSON(http.StatusOK, users)
 }
 
 type updateUserDataResponse struct {
@@ -191,4 +238,35 @@ func (server *Server) updateUserInfo(ctx *gin.Context) {
 		Success: status,
 	}
 	ctx.JSON(http.StatusOK, rsp)
+}
+
+func (server *Server) userInfo(ctx *gin.Context) {
+	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", username, password, pgaddress, dbname))
+	if err != nil {
+		fmt.Println("Error connecting to the database:", err)
+		return
+	}
+	defer db.Close()
+
+	id := ctx.Param("id")
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Query to fetch user info
+	query := "SELECT user_id, username, profile_picture, biography, email, created_at FROM users WHERE user_id = $1"
+	var user User
+	err = db.QueryRow(query, userID).Scan(&user.UserID, &user.Username, &user.ProfilePicture, &user.Biography, &user.Email, &user.CreatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, user)
 }
