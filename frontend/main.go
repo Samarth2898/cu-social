@@ -77,7 +77,7 @@ type UserInfoUpdateResponse struct {
 }
 
 const (
-	backendServer = "http://localhost:8080"
+	backendServer = "http://cusocial-backend:8080"
 )
 
 func main() {
