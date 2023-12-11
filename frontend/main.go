@@ -104,7 +104,8 @@ func main() {
 		}
 
 		marshalledLoginBody, _ := json.Marshal(loginReqBody)
-		res, err := helper.PostReq("http://0.0.0.0:8080/users/login", marshalledLoginBody)
+		url := fmt.Sprintf("%s/users/login", backendServer)
+		res, err := helper.PostReq(url, marshalledLoginBody)
 		if err != nil {
 			fmt.Println("error sending POST request: ", err.Error())
 		}
@@ -140,7 +141,8 @@ func main() {
 			Password: password,
 		}
 		marshalledBody, _ := json.Marshal(reqBody)
-		res, err := helper.PostReq("http://0.0.0.0:8080/users", marshalledBody)
+		url := fmt.Sprintf("%s/users", backendServer)
+		res, err := helper.PostReq(url, marshalledBody)
 		if err != nil {
 			fmt.Println("error sending POST request: ", err.Error())
 		}
@@ -159,7 +161,8 @@ func main() {
 		}
 
 		marshalledLoginBody, _ := json.Marshal(loginReqBody)
-		res, err = helper.PostReq("http://0.0.0.0:8080/users/login", marshalledLoginBody)
+		url = fmt.Sprintf("%s/users/login", backendServer)
+		res, err = helper.PostReq(url, marshalledLoginBody)
 		if err != nil {
 			fmt.Println("error sending POST request: ", err.Error())
 		}
@@ -168,7 +171,7 @@ func main() {
 		postLoginResponse := &UserLoginResponse{}
 		derr = json.NewDecoder(res.Body).Decode(postLoginResponse)
 		if derr != nil {
-			panic(derr)
+			fmt.Println("error: ", derr.Error())
 		}
 		fmt.Println("logged in: ", postLoginResponse.User.UserId, postLoginResponse.AccessToken)
 		if res.Status == "200 OK" {
@@ -188,7 +191,7 @@ func main() {
 	r.POST("/submit-profile", func(c *gin.Context) {
 		userID, _ := strconv.Atoi(c.Query("user_id"))
 		access_token := c.Query("access_token")
-		url := uploadProfilePhoto(c)
+		url := uploadProfilePhoto(c, c.Query("user_id"))
 		bio := c.PostForm("userBio")
 		updateReqBody := UserInfoUpdate{
 			UserID:         int32(userID),
@@ -196,7 +199,8 @@ func main() {
 			Biography:      bio,
 		}
 		marshalledBody, _ := json.Marshal(updateReqBody)
-		res, err := helper.PutReq("http://0.0.0.0:8080/users/update", marshalledBody)
+		url = fmt.Sprintf("%s/users/update", backendServer)
+		res, err := helper.PutReq(url, marshalledBody)
 		if err != nil {
 			fmt.Println("error sending POST request: ", err.Error())
 		}
@@ -393,9 +397,9 @@ func uploadVideoFunc(c *gin.Context) {
 	c.Redirect(http.StatusMovedPermanently, "/feed")
 }
 
-func uploadProfilePhoto(c *gin.Context) string {
+func uploadProfilePhoto(c *gin.Context, userID string) string {
 
-	bucketName := "cusocial"
+	bucketName := "cusocialtest"
 
 	ctx := context.Background()
 
@@ -413,7 +417,7 @@ func uploadProfilePhoto(c *gin.Context) string {
 	}
 	defer client.Close()
 
-	objectName := handler.Filename
+	objectName := userID + "_" + handler.Filename
 	obj := client.Bucket(bucketName).Object(objectName)
 	wObj := obj.NewWriter(ctx)
 	defer wObj.Close()

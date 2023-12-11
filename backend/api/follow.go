@@ -16,7 +16,7 @@ type Follow struct {
 
 func (server *Server) followUser(ctx *gin.Context) {
 
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:@%s/%s?sslmode=disable", username, pgaddress, dbname))
+	db, err := sql.Open(server.config.DBDriver, server.config.DBSource)
 	if err != nil {
 		fmt.Println("Error connecting to the database:", err)
 		return
@@ -49,7 +49,7 @@ func (server *Server) followUser(ctx *gin.Context) {
 
 func (server *Server) checkFollowUser(ctx *gin.Context) {
 
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:@%s/%s?sslmode=disable", username, pgaddress, dbname))
+	db, err := sql.Open(server.config.DBDriver, server.config.DBSource)
 	if err != nil {
 		fmt.Println("Error connecting to the database:", err)
 		return

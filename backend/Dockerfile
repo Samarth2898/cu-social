@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.18.2-alpine3.16 AS builder
+FROM golang:1.21-alpine3.19 AS builder
 WORKDIR /app
 COPY . .
 RUN go build -o main main.go
@@ -16,6 +16,6 @@ COPY start.sh .
 COPY wait-for.sh .
 COPY db/migration ./migration
 
-EXPOSE 8081
+EXPOSE 8080
 CMD ["/app/main"]
 ENTRYPOINT [ "/app/start.sh" ]

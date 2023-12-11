@@ -10,13 +10,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	username  = "postgres"
-	password  = "postgres"
-	dbname    = "cusocial"
-	pgaddress = "localhost"
-)
-
 type Post struct {
 	PostID         int    `json:"post_id" db:"post_id"`
 	Title          string `json:"title" db:"title"`
@@ -30,7 +23,7 @@ type Post struct {
 
 func (server *Server) getUserPosts(ctx *gin.Context) {
 
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", username, password, pgaddress, dbname))
+	db, err := sql.Open(server.config.DBDriver, server.config.DBSource)
 	if err != nil {
 		fmt.Println("Error connecting to the database:", err)
 		return
@@ -71,7 +64,7 @@ func (server *Server) getUserPosts(ctx *gin.Context) {
 
 func (server *Server) getPosts(ctx *gin.Context) {
 
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", username, password, pgaddress, dbname))
+	db, err := sql.Open(server.config.DBDriver, server.config.DBSource)
 	if err != nil {
 		fmt.Println("Error connecting to the database:", err)
 		return
@@ -119,7 +112,7 @@ func (server *Server) getPosts(ctx *gin.Context) {
 
 func (server *Server) createPost(ctx *gin.Context) {
 
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", username, password, pgaddress, dbname))
+	db, err := sql.Open(server.config.DBDriver, server.config.DBSource)
 	if err != nil {
 		fmt.Println("Error connecting to the database:", err)
 		return

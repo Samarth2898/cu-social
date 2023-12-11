@@ -174,7 +174,7 @@ type searchUserResponse struct {
 // }
 
 func (server *Server) searchUsers(ctx *gin.Context) {
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", username, password, pgaddress, dbname))
+	db, err := sql.Open(server.config.DBDriver, server.config.DBSource)
 	if err != nil {
 		fmt.Println("Error connecting to the database:", err)
 		return
@@ -209,17 +209,31 @@ func (server *Server) searchUsers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, users)
 }
 
+type updateUserDataRequest struct {
+	ProfilePicture string `json:"profile_picture"`
+	Biography      string `json:"biography"`
+	UserID         int32  `json:"user_id"`
+}
+
 type updateUserDataResponse struct {
 	Success bool `json:"success"`
 }
 
 func (server *Server) updateUserInfo(ctx *gin.Context) {
-	var req db.UpdateUserParams
+	var req updateUserDataRequest
+	var dbReq db.UpdateUserParams
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errResponse(err))
 		return
 	}
-	res, err := server.store.UpdateUser(ctx, req)
+
+	dbReq = db.UpdateUserParams{
+		UserID:         req.UserID,
+		ProfilePicture: sql.NullString{String: req.ProfilePicture, Valid: true},
+		Biography:      sql.NullString{String: req.Biography, Valid: true},
+	}
+	fmt.Println("inside update: ", dbReq)
+	res, err := server.store.UpdateUser(ctx, dbReq)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errResponse(err))
@@ -241,7 +255,7 @@ func (server *Server) updateUserInfo(ctx *gin.Context) {
 }
 
 func (server *Server) userInfo(ctx *gin.Context) {
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", username, password, pgaddress, dbname))
+	db, err := sql.Open(server.config.DBDriver, server.config.DBSource)
 	if err != nil {
 		fmt.Println("Error connecting to the database:", err)
 		return
