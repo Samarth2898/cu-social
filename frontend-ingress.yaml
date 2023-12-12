@@ -35,3 +35,15 @@ spec:
     - port: 3000
   selector:
     app: cusocial-frontend
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cusocial-backend
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+  selector:
+    app: cusocial-backend
