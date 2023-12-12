@@ -52,7 +52,7 @@
             const searchInput = document.getElementById('searchInput');
             const searchResults = document.getElementById('searchResults');
 
-            const endpointUrl = 'http://cusocial-backend:8080/users/list'; // Replace with your actual endpoint URL
+            const endpointUrl = '/list-users'; // Replace with your actual endpoint URL
 
             var users = []
             var usernames = []
@@ -93,13 +93,14 @@
                         const li = document.createElement('li');
                         const button = document.createElement('button');
                         button.textContent = result;
-                        button.addEventListener('click', function() {
+                        button.onclick =function() {
                             alert('You clicked: ' + 'http://0.0.0.0:3000/profile1/' + dictionary[result]);
                             console.log("diction123", dictionary[result])
                             // // const foundUser = data.find(user => user.username === result);
 
-                            window.location.href = 'http://0.0.0.0:3000/profile1/' + dictionary[result];
-                        });
+                            document.location.href = '/profile1/' + dictionary[result];
+                            return false;
+                        };
                         li.appendChild(button);
                         searchResults.appendChild(li);
                     });

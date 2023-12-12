@@ -15,13 +15,13 @@ import (
 )
 
 type User struct {
-	UserID         int    `db:"user_id" json:"user_id"`
-	Username       string `db:"username" json:"username"`
-	Password       string `db:"password" json:"password"`
-	ProfilePicture string `db:"profile_picture" json:"profile_picture"`
-	Biography      string `db:"biography" json:"biography"`
-	Email          string `db:"email" json:"email"`
-	CreatedAt      string `db:"created_at" json:"created_at"`
+	UserID         int     `db:"user_id" json:"user_id"`
+	Username       *string `db:"username" json:"username"`
+	Password       *string `db:"password" json:"password"`
+	ProfilePicture *string `db:"profile_picture" json:"profile_picture"`
+	Biography      *string `db:"biography" json:"biography"`
+	Email          *string `db:"email" json:"email"`
+	CreatedAt      *string `db:"created_at" json:"created_at"`
 }
 
 type createUserRequest struct {
@@ -186,6 +186,7 @@ func (server *Server) searchUsers(ctx *gin.Context) {
 	query := "SELECT * FROM users"
 	rows, err := db.Query(query)
 	if err != nil {
+		fmt.Println("Error: ", err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users"})
 		return
 	}
@@ -195,13 +196,14 @@ func (server *Server) searchUsers(ctx *gin.Context) {
 		var user User
 		err := rows.Scan(&user.UserID, &user.Username, &user.Password, &user.ProfilePicture, &user.Biography, &user.Email, &user.CreatedAt)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Error: ", err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan users"})
 			return
 		}
 		users = append(users, user)
 	}
 	if err := rows.Err(); err != nil {
+		fmt.Println("Error: ", err.Error())
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to iterate over users"})
 		return
 	}

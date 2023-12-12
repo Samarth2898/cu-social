@@ -6,6 +6,11 @@
     <link rel="stylesheet" href="../styles/profile.css">
     <link rel="stylesheet" type="text/css" href="../styles/styles.css">
 </head>
+<script>
+    function followButton() {
+        document.getElementById("follow-button").innerHTML = "Following";
+    }
+</script>
 <body>
     <nav>
         <div class="container">
@@ -41,10 +46,10 @@
         <div class="profile">
             <div class="profile-header">
                 <img src="https://picsum.photos/200/300" alt="Profile Picture" class="profile-picture">
-                <h1 class="username">John Doe</h1>
+                <h1 class="username">User 1</h1>
                 <p class="user-bio">Front-end Developer</p>
-                <button class="btn btn-primary">
-                    <a href="{{ .followURL }}" style="color: #fff;text-decoration: none;">Follow</a>
+                <button class="btn btn-primary" id="follow-button" onclick="followButton()">
+                    Follow
                 </button>
             </div>
             <div class="posts">

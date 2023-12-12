@@ -239,6 +239,23 @@ func main() {
 		})
 	})
 
+	r.GET("/list-users", func(c *gin.Context) {
+		fmt.Println("inside list user")
+		url := fmt.Sprintf("%s/users/list", backendServer)
+		marshalledBody, _ := json.Marshal("{}")
+		res, err := helper.GetReq(url, marshalledBody)
+		if err != nil {
+			fmt.Println("error sending GET request: ", err.Error())
+		}
+		defer res.Body.Close()
+		var user []User
+		derr := json.NewDecoder(res.Body).Decode(&user)
+		if derr != nil {
+			fmt.Println("error in decoding: ", derr.Error())
+		}
+		c.JSON(http.StatusOK, user)
+	})
+
 	r.GET("/add_post", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "add_post.html", gin.H{})
 	})
@@ -252,6 +269,7 @@ func main() {
 	})
 
 	r.GET("/profile1/:userID", func(c *gin.Context) {
+		fmt.Println("inside /profile1")
 		userIDStr := c.Param("userID")
 		userID, _ := strconv.Atoi(userIDStr)
 		// currentUser := (c.Query("user_id"))
@@ -451,7 +469,7 @@ func uploadVideoFunc(c *gin.Context) {
 
 func uploadProfilePhoto(c *gin.Context, userID string) string {
 
-	bucketName := "cusocialtest"
+	bucketName := "cusocial"
 
 	ctx := context.Background()
 

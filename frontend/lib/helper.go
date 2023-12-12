@@ -42,3 +42,20 @@ func PutReq(postUrl string, body []byte) (response *http.Response, err error) {
 
 	return res, err
 }
+
+func GetReq(getUrl string, body []byte) (response *http.Response, err error) {
+	r, err := http.NewRequest("GET", getUrl, bytes.NewBuffer(body))
+	if err != nil {
+		panic(err)
+	}
+
+	r.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	res, err := client.Do(r)
+	if err != nil {
+		panic(err)
+	}
+
+	return res, err
+}
