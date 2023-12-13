@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: cusocial-backend
-          image: nihalsreenivasu/cusocial-backend:v3.0.0
+          image: nihalsreenivasu/cusocial-backend:v4.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

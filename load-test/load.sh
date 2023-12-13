@@ -1,10 +1,9 @@
 #!/bin/bash
 
-URL="http://34.160.40.147/feed"  # Replace with your endpoint URL
-TOTAL_REQUESTS=10000                # Total number of requests to send
-CONCURRENCY=10                    # Number of concurrent requests
+URL="http://cusocial.us/feed"  
+TOTAL_REQUESTS=10000              
+CONCURRENCY=10                    
 
-# Function to perform concurrent requests
 send_requests() {
   for ((i=0; i<$CONCURRENCY; i++)); do
     curl -s -o /dev/null -w "%{http_code}\n" $URL &

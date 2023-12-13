@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: cusocial-frontend
-          image: nihalsreenivasu/cusocial-frontend:v1.0.0
+          image: nihalsreenivasu/cusocial-frontend:v3.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

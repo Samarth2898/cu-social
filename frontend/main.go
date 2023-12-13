@@ -229,7 +229,7 @@ func main() {
 
 	r.GET("/feed", func(c *gin.Context) {
 		userID, _ := strconv.Atoi(c.Query("user_id"))
-		userID = 2
+		// userID = 2
 		userProfile := getUser(userID)
 		fmt.Println(userProfile)
 		FeedObjectInstance := getFeedByUser(userID)
@@ -317,6 +317,7 @@ func main() {
 
 	r.POST("/uploadVideo", func(c *gin.Context) {
 		uploadVideoFunc(c)
+		c.Redirect(http.StatusSeeOther, "/feed")
 	})
 
 	log.Fatal(r.Run(":3000"))
@@ -423,7 +424,7 @@ func uploadVideoFunc(c *gin.Context) {
 
 	url := fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucketName, objectName)
 
-	c.String(http.StatusOK, "File uploaded successfully! URL: %s", url)
+	// c.String(http.StatusOK, "File uploaded successfully! URL: %s", url)
 
 	url = fmt.Sprintf("%s/post", backendServer) // Replace with your server URL
 
@@ -464,7 +465,7 @@ func uploadVideoFunc(c *gin.Context) {
 
 	fmt.Println("Response Status:", resp.Status)
 
-	c.Redirect(http.StatusMovedPermanently, "/feed")
+	// c.Redirect(http.StatusMovedPermanently, "/feed")
 }
 
 func uploadProfilePhoto(c *gin.Context, userID string) string {
