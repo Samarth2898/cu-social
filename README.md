@@ -10,4 +10,6 @@
 - Build an application which scales automatically based on the load on the pod.
 
 ## The architecture - 
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![alt text](https://github.com/cu-csci-4253-datacenter-fall-2023/final-project-cu-social/blob/main/architecture.png)
+
+
